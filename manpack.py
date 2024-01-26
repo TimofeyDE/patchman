@@ -1,4 +1,4 @@
-import os
+import sys
 import subprocess
 import platform
 import distro
@@ -85,6 +85,9 @@ def install_package(package_name, action, version=None):
 
 # Entry point of the program
 def main():
+    if len(sys.argv) <= 1:
+        path = str(input("Please enter the full path to the csv file: "))
+
     # Example usage:
     #install_package('tree', "update")  # Replace with your package name and version
     packages = get_packages("packages.csv")
