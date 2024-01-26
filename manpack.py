@@ -16,7 +16,7 @@ def get_packages(path: str):
         packages.append({ 
             "package" : row.package_name, 
             "command" : row.command,
-            "version" : str(row.preferred_version)
+            "version" : str(row.preferred_version) if not pd.isna(row.preferred_version) else ""
         })
 
     return packages
@@ -54,7 +54,7 @@ def get_pkg_manager():
     return pkg_manager
 
 
-def install_package(package_name, action, version=None):
+def install_package(logger, package_name, action, version=None):
     """
     Install or update a specific package to a given version.
     If no version is provided, the latest available version is installed.
@@ -77,10 +77,13 @@ def install_package(package_name, action, version=None):
 
     # Run the package install command
     try:
-        subprocess.run(command, check=True)
-        print(f"Package {package} installed/updated successfully.")
+        proc = subprocess.run(command, check=True, text=True) #'''stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL''' 
+        if proc.returncode == 1:
+            logger.write(f"PIZDEZ.\n")
+        else:
+            logger.write(f"Package {package} installed/updated successfully.\n")
     except subprocess.CalledProcessError as e:
-        print(f"An error occurred while installing/updating {package}: {e}")
+        logger.write(f"An error occurred while installing/updating {package}: {e}\n")
 
 
 # Entry point of the program
@@ -92,9 +95,13 @@ def main():
     #install_package('tree', "update")  # Replace with your package name and version
     packages = get_packages("packages.csv")
 
-    for pkg in packages:
-        print(pkg['package'], pkg['command'], pkg['version'])
-        install_package(pkg['package'], pkg['command'], pkg['version'])
+    open('log.txt', 'w').close()
+    with open("log.txt", 'a') as logger:
+        for pkg in packages:
+            #print(pkg['package'], pkg['command'], pkg['version'])
+            install_package(logger, pkg['package'], pkg['command'], pkg['version'])
+
+    logger.close()
 
 
 if __name__ == '__main__':
