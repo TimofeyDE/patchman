@@ -1,4 +1,2 @@
-subprocess
-platform
-distro
-pandas
+distro==1.9.0
+pandas==2.1.2
